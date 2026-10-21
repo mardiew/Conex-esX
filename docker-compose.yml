@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: conexoesx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: conexoesx
+      POSTGRES_USER: conexoesx
+      POSTGRES_PASSWORD: conexoesx
+    ports:
+      - "5432:5432"
+    volumes:
+      - conexoesx_pgdata:/var/lib/postgresql/data
+
+volumes:
+  conexoesx_pgdata:
