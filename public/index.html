@@ -36,10 +36,32 @@ button{cursor:pointer;font:inherit}.btn{border:1px solid #6d3aa0;background:tran
 let token=localStorage.getItem('cx_token'), signup=false;
 function openAuth(){document.getElementById('auth').classList.add('show')}
 function closeM(id){document.getElementById(id).classList.remove('show')}
-function toggleAuth(){signup=!signup;document.getElementById('authTitle').textContent=signup?'Criar conta':'Entrar';document.getElementById('name').style.display=signup?'block':'none';document.getElementById('authSwitch').textContent=signup?'Já tenho conta':'Ainda não tenho conta'}
-async function submitAuth(){const body={email:email.value,password:password.value};if(signup)body.name=name.value;const r=await fetch('/api/auth/'+(signup?'register':'login'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok){authMsg.textContent=d.error||'Erro';return}token=d.token;localStorage.setItem('cx_token',token);authMsg.className='msg ok';authMsg.textContent='Conta conectada!';setTimeout(()=>closeM('auth'),600)}
-function premium(){if(!token){openAuth();return}document.getElementById('prem').classList.add('show')}
+function toggleAuth(){signup=!signup;document.getElementById('authTitle').textContent=signup?'Criar conta':'Entrar';document.getElementById('name').style.display=signup?'block':'none';document.getElementById('authSwitch').textContent=signup?'Já tenho conta':'Ainda não tenho conta'}function premium(){if(!token){openAuth();return}document.getElementById('prem').classList.add('show')}
 async function startCheckout(){const r=await fetch('/api/premium/subscribe',{method:'POST',headers:{Authorization:'Bearer '+token}});const d=await r.json();if(!r.ok){premMsg.textContent=d.error||'Erro';return}location.href=d.checkoutUrl}
 async function sendLike(toUserId){if(!token){openAuth();return}const r=await fetch('/api/likes',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({toUserId})});const d=await r.json();alert(d.message||d.error);if(d.premiumRequired)premium()}
+async function submitAuth(){
+  const nameField = document.getElementById("name");
+  const emailField = document.getElementById("email");
+  const passwordField = document.getElementById("password");
+  const msg = document.getElementById("authMsg");
+  const body = {email: emailField.value.trim(), password: passwordField.value};
+  if (signup) body.name = nameField.value.trim();
+  if (signup && !body.name) { msg.textContent = "Digite seu nome."; return; }
+  if (!body.email || !body.password || body.password.length < 8) { msg.textContent = "Confira o e-mail e digite uma senha com pelo menos 8 caracteres."; return; }
+  msg.textContent = "Enviando...";
+  try {
+    const r = await fetch("/api/auth/" + (signup ? "register" : "login"), {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    const d = await r.json();
+    if (!r.ok) { msg.textContent = d.error || "Não foi possível concluir."; return; }
+    token = d.token;
+    localStorage.setItem("cx_token", token);
+    msg.className = "msg ok";
+    msg.textContent = "Conta conectada!";
+    setTimeout(() => closeM("auth"), 600);
+  } catch (e) {
+    msg.textContent = "Falha de conexão. Tente novamente.";
+  }
+}
 </script>
 </body></html>
+
